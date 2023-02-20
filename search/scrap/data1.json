@@ -1,0 +1,40 @@
+<?php
+$servername = "localhost";
+$username = "root";
+$password = "";
+$databasename = "projdb";
+
+
+// Create connection
+$conn = new mysqli($servername, $username, $password, $databasename);
+//$conn = new mysqli($servername, $username, $password);
+
+// Check connection
+if ($conn->connect_error) {
+	die("Connection failed: " . $conn->connect_error);
+}
+	echo "Connected successfully";
+
+
+$sql = "SELECT refnum FROM tbl_transaction";
+$result = $conn->query($sql);
+var_dump($result);
+if ($result->num_rows > 0) 
+{
+  // output data of each row
+  while($row = $result->fetch_assoc()) 
+  {
+    //echo "id: " . $row["tranID"]. " - ref: " . $row["refnum"]."<br>";
+	//echo $row;
+	$a = array($row);
+	echo json_encode($a);
+	} 
+}
+else{
+	echo "0 results";
+  //vardump $result;
+}
+
+
+$conn->close();
+?>
