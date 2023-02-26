@@ -36,4 +36,30 @@ $(document).ready(function(){
             });
         }
     });
+
+    //Delete transactions
+    var btnDeleteTransaction = $('.btn-delete-transaction');
+
+    if(btnDeleteTransaction.length > 0) {
+        btnDeleteTransaction.each(function() {
+            $(this).click(function(e) {
+                e.preventDefault();
+                var result = confirm("Do you want to delete this transaction?");
+                if(result) {
+                    $.ajax({
+                        type: "GET",
+                        dataType: "json",
+                        url: "delete-transaction.php?tranID=" + $(this).attr("data-id"),
+                        success: function(data) {
+                            if(data.deleted == true) {
+                                window.location.href = "transactions.php";
+                            } else {
+                                alert("There was an error deleting the transaction. Please try again later.")
+                            }
+                        }
+                    });
+                }
+            });
+        });
+    }    
 });

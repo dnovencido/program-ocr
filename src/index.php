@@ -1,43 +1,50 @@
 <?php
-    include 'session.php';
     use thiagoalessio\TesseractOCR\TesseractOCR;
-
     require 'vendor/autoload.php';
+    include 'session.php';
+    include 'check_login.php';
+    include 'functions.php';
 
     $errors = [];
+    $res = [];
+    $message = [];
 
-    if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-        if (isset($_POST['submit'])) {
-            $file_name = $_FILES['file']['name'];
-            $tmp_file = $_FILES['file']['tmp_name'];
+    if (isset($_POST['upload-file'])) {
+        $file_name = $_FILES['file']['name'];
+        $tmp_file = $_FILES['file']['tmp_name'];
 
+        $file_name = $_SESSION['uid'] . '_' . time() . '_' . str_replace(array('!', "@", '#', '$', '%', '^', '&', ' ', '*', '(', ')', ':', ';', ',', '?', '/' . '\\', '~', '`', '-'), '_', strtolower($file_name));
 
-            if (!session_id()) {
-                session_start();
-                $unq = session_id();
+        if (move_uploaded_file($tmp_file, 'uploads/' . $file_name)) {
+            try {
+    
+                $fileRead = (new TesseractOCR('uploads/' . $file_name))
+                    ->setLanguage('eng')
+                    ->run();
+                    
+                    $res = explode(" ",$fileRead);
+    
+            } catch (Exception $e) {
+    
+                echo $e->getMessage();
+    
             }
+        } else {
+            $errors[] = 'File failed to upload';
+        }
+    }
 
-            $file_name = $unq . '_' . time() . '_' . str_replace(array('!', "@", '#', '$', '%', '^', '&', ' ', '*', '(', ')', ':', ';', ',', '?', '/' . '\\', '~', '`', '-'), '_', strtolower($file_name));
-
-            if (move_uploaded_file($tmp_file, 'uploads/' . $file_name)) {
-                try {
-        
-                    $fileRead = (new TesseractOCR('uploads/' . $file_name))
-                        ->setLanguage('eng')
-                        ->run();
-                        
-                        $sam = explode(" ",$fileRead);
-
-        
-                } catch (Exception $e) {
-        
-                    echo $e->getMessage();
-        
+    if(isset($_POST['save-details'])) {
+       $errors = validate_form_transaction($_POST['refnum'], $_POST['number'], $_POST['amount'], $_POST['name']);
+        if(empty($errors)) {
+            if(!check_existing_reference_num($_POST['refnum'])) {
+                if(save_details($_POST['refnum'], $_POST['number'], $_POST['amount'], $_POST['name'])) {
+                    $message[] = "Successfully saved";
+                    unset($_POST);
                 }
             } else {
-                $errors[] = 'File failed to upload';
+                $errors[] = "The reference number entered is already existing.";
             }
-
         }
     }
 ?>
@@ -46,19 +53,46 @@
         <div class="row justify-content-center">
             <div class="col-md-6">
                 <?php if (!empty($errors)) { ?>
-                    <?php include "_error-message.php" ?>
+                    <?php include "shared/_error-message.php" ?>
+                <?php } ?>
+                <?php if (!empty($message)) { ?>
+                    <?php include "shared/_success-message.php" ?>
                 <?php } ?>
                 <div class="card">
                     <div class="card-body">
-                        <h1 class="h3 mb-3 fw-normal">Transactions </h1>
+                        <h1 class="h3 mb-3 fw-normal">Add transaction </h1>
                         <div class="mb-3">
                             <form method="post" enctype="multipart/form-data">
                                 <label for="file" class="form-label">Upload image:</label>
                                 <input class="form-control form-control-sm" id="file" name="file" type="file">
-                                <button class="btn btn-success btn-sm mt-3" type="submit" name="submit">Open</button>
+                                <input type="submit" class="btn btn-success btn-sm mt-3" name="upload-file" value="Upload" />
                             </form>
                         </div>
                         <hr>
+                        <div class="mb-3">
+                            <form method="post">
+                                <div class="mb-3">
+                                    <label for="refnum" class="form-label">Reference Number: </label>
+                                    <?php $refnum = (isset($res[18])) ? $res[19] . $res[20] . $res[21] : ""  ?>
+                                    <input type="text" class="form-control" id="refnum" name="refnum" value= "<?= (isset($_POST['refnum'])) ? $_POST['refnum'] : $refnum ?>" />
+                                </div>
+                                <div class="mb-3">
+                                    <label for="number" class="form-label">Number: </label>
+                                    <?php $number = (isset($res[13])) ? $res[13] : "" ?>
+                                    <input type="text" class="form-control" id="number" name="number" value= "<?= (isset($_POST['number'])) ? $_POST['number'] : $number ?>" />
+                                </div>
+                                <div class="mb-3">
+                                    <label for="number" class="form-label">Amount: </label>
+                                    <?php $amount = (isset($res[14])) ? $res[14] : "" ?>
+                                    <input type="text" class="form-control" id="amount" name="amount" value= "<?= (isset($_POST['amount'])) ? $_POST['amount'] : $amount ?>" />
+                                </div>
+                                <div class="mb-3">
+                                    <label for="name" class="form-label">Name: </label>
+                                    <input type="text" class="form-control" id="name" name="name" value="<?= (isset($_POST['name'])) ? $_POST['name'] : "" ?>" />
+                                </div>
+                                <input type="submit" name="save-details" class="btn btn-primary" value="Save" />
+                            </form>
+                        </div>
                         <div class="mb-3">
                             <label for="search-transaction" class="form-label">Search reference number</label>
                             <input type="text" class="form-control" id="search-transaction" placeholder="Enter reference number">

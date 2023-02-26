@@ -44,7 +44,7 @@
         return $flag;
     }    
 
-    function save_registration($username, $lname, $fname, $position, $password) {
+    function save_registration($username, $fname, $lname, $position, $password) {
         global $conn;
         $user = [];
 
@@ -63,13 +63,130 @@
                 if($result = $conn->query($query)) {
                     $row = mysqli_fetch_array($result, MYSQLI_ASSOC);
                     $user = [
-                        'id' => $row['id'],
-                        'name' => $row['name']
+                        'uid' => $row['uid'],
+                        'fname' => $row['fname']
                     ];
                 }
             }
         }
 
         return $user;
-    }    
+    } 
+    
+
+    function validate_form_transaction($refnum, $number, $amount, $name) {
+        $validation_errors = [];
+
+        if(!$refnum) {
+            $validation_errors[] = "Reference number is required.";
+        }
+        if(!$number) {
+            $validation_errors[] = "Number is required.";
+        }
+        if(!$amount) {
+            $validation_errors[] = "Amount is required.";
+        }
+        if(!$name) {
+            $validation_errors[] = "Name is required.";
+        }
+
+        return $validation_errors;
+    }
+
+    
+    function save_details($reference_number, $number, $amount, $name) {
+        global $conn;
+        $flag = false;
+
+        $date_created = date('Y-m-d H:i:s');
+        $query = "INSERT INTO `tbl_transaction` (`refnum`, `number`, `amount`, `name`, `date_created`) VALUES ('".escape_string($reference_number)."', '".escape_string(($number))."', '".escape_string(($amount))."', '".escape_string(($name))."', '".$date_created."')";
+        
+        if ($conn->query($query)) {
+            $flag = true;
+        }
+
+        return $flag;
+    }
+
+    function update_transaction($tranID, $refnum, $number, $amount, $name) {
+        global $conn;
+        $flag = false;
+
+        $query = "UPDATE `tbl_transaction` SET `refnum` = '".escape_string($refnum)."', `number` = '".escape_string($number)."', `amount` = '".escape_string($amount)."', `name` = '".escape_string($name)."' WHERE `tranID` = '".escape_string($tranID)."' ";
+        
+        if ($conn->query($query)) {
+            $flag = true;
+        }
+
+        return $flag;
+    }
+
+    function get_all_transactions($offset, $total_records_per_page) {
+        global $conn;
+        $transactions= [];
+
+        $query = "SELECT * FROM `tbl_transaction` LIMIT $offset, $total_records_per_page";
+       
+        if ($result = $conn->query($query)) {
+            $transactions = $result->fetch_all(MYSQLI_ASSOC);
+        }
+
+        return $transactions;
+    }  
+    
+
+    function check_existing_reference_num($reference_number) {
+        global $conn;
+        $flag = false;
+
+        $query = "SELECT * FROM `tbl_transaction` WHERE `refnum` = '".escape_string($reference_number)."' ";
+
+        if ($result = $conn->query($query)) {
+            if ($result->num_rows > 0) {
+                $flag = true;
+            }
+        }
+
+        return $flag;
+    }
+
+    
+    function get_transaction($transaction_id) {
+        global $conn;
+        $transaction = [];
+        $query = "SELECT * FROM `tbl_transaction` WHERE `tranID` = $transaction_id";
+
+        if ($result = $conn->query($query)) {
+            $transaction = $result->fetch_array(MYSQLI_ASSOC);
+        }
+
+        return $transaction;
+
+    }
+
+    function delete_transaction($tranID) {
+        global $conn;
+        $flag = false;
+
+        $query = "DELETE FROM tbl_transaction WHERE tranID = '".escape_string($tranID)."'";
+
+        if ($conn->query($query)) {
+            $flag = true;
+        }
+
+        return $flag;
+    }
+
+    function get_total_number_records() {
+        global $conn;
+        $total = 0;
+
+        $query = "SELECT * FROM `tbl_transaction`";
+
+        if ($result = $conn->query($query)) {
+            $total = $result->num_rows;
+        }
+    
+        return $total;
+    }
 ?>

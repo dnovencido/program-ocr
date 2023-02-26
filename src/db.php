@@ -1,7 +1,7 @@
 <?php
-    $servername = "mysql_db";
+    $servername = "localhost";
     $username = "root";
-    $password = "root";
+    $password = "";
     $databasename = "projdb";
 
     // Create connection
