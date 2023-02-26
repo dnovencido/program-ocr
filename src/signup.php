@@ -4,9 +4,9 @@
     
     $errors = []; 
 
-    if($_POST['submit']) {
+    if(isset($_POST['submit'])) {
         if(!$_POST['username']) {
-            $errors[] = "Name is required.";
+            $errors[] = "User name is required.";
         }
 
         if(!$_POST['password']) {
@@ -35,8 +35,7 @@
                 if(!empty($user)) {
                     $_SESSION['uid'] = $user['uid'];
                     $_SESSION['fname'] = $user['fname'];
-
-                    header("Location: account.php");
+                    header("Location: index.php");
                 } else {
                     $errors[] = "There was an error logging in your account.";
                 }
@@ -63,23 +62,23 @@
                 <form method="post">
                     <div class="form-group mb-3">
                         <label for="username">Username: </label>
-                        <input type="text" name="username" class="form-control" value="<?= $_POST['username'] ?>" />
+                        <input type="text" name="username" class="form-control" value="<?= isset($_POST['username']) ? $_POST['username'] : ""  ?>" />
                     </div>
                     <div class="form-group mb-3">
                         <label for="fname">First name: </label>
-                        <input type="text" name="firstname" class="form-control"value="<?= $_POST['firstname'] ?>" />
+                        <input type="text" name="firstname" class="form-control"value="<?= isset($_POST['firstname']) ? $_POST['firstname'] : ""  ?>" />
                     </div>
                     <div class="form-group mb-3">
                         <label for="fname">Last name: </label>
-                        <input type="text" name="lastname" class="form-control" value="<?= $_POST['lastname'] ?>" />
+                        <input type="text" name="lastname" class="form-control" value="<?= isset($_POST['lastname']) ? $_POST['lastname'] : ""  ?>" />
                     </div>
                     <div class="form-group mb-3">
                         <label for="position">Position: </label>
-                        <input type="text" name="position" class="form-control" value="<?= $_POST['position'] ?>" />
+                        <input type="text" name="position" class="form-control" value="<?= isset($_POST['position']) ? $_POST['position'] : ""  ?>" />
                     </div>
                     <div class="form-group mb-3">
                         <label for="password">Password: </label>
-                        <input type="password" name="password" class="form-control" value="<?= $_POST['password'] ?>" />
+                        <input type="password" name="password" class="form-control" value="<?= isset($_POST['password']) ? $_POST['password'] : ""  ?>" />
                     </div>
                     <div class="form-group mb-3">
                         <label for="confirm_password">Confirm: </label>

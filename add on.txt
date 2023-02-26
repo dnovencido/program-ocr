@@ -1,6 +1,0 @@
-login page
-	>user credentials,registration, and user type
-	>search (for reference number)/scanner (screenshot of gcash)
-	>result details will be pass to corresponding textbox and able to save (if not yet in database unless it is existing -provide warning for existing reference number)
-	>reports simple list that show esquence by 10-50 list per page with groupings per month or other sorting processes
-	>by user type super admin can backtrack transaction/the use of system
