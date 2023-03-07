@@ -189,4 +189,84 @@
     
         return $total;
     }
+
+    function get_total_number_trace_records($search, $date) {
+        global $conn;
+        $total = 0;
+        $search_field = false;
+
+        $query = "SELECT * FROM `tbl_trace`";
+        
+        if($search != null) {
+            $query .= "WHERE (`tbl_trace`.`uname` = '".escape_string($search)."' OR `tbl_trace`.`action` = '".escape_string($search)."')";
+            $search_field = true;
+        }
+    
+        if($date != null) {
+            $query .= ($search_field) ? ' AND ' : '';  
+            $query .= "(`tbl_trace`.`date` LIKE '".date("Y-m-d", strtotime(escape_string($date)))."%')";
+        }
+
+        if ($result = $conn->query($query)) {
+            $total = $result->num_rows;
+        }
+    
+        return $total;
+    }
+    
+
+    function get_all_trace_transactions($offset, $total_records_per_page, $search, $date) {
+        global $conn;
+        $transactions = [];
+        $search_field = false;
+
+        $query = "SELECT * FROM `tbl_trace`";
+        
+        if($search != null) {
+            $query .= "WHERE (`tbl_trace`.`uname` = '".escape_string($search)."' OR `tbl_trace`.`action` = '".escape_string($search)."')";
+            $search_field = true;
+        }
+    
+        if($date != null) {
+            $query .= ($search_field) ? ' AND ' : '';  
+            $query .= "(`tbl_trace`.`date` LIKE '".date("Y-m-d", strtotime(escape_string($date)))."%')";
+        }
+
+        $query .= " LIMIT $offset, $total_records_per_page";
+
+        if ($result = $conn->query($query)) {
+            $transactions = $result->fetch_all(MYSQLI_ASSOC);
+        }
+
+        return $transactions;
+    }      
+
+    function save_trace($action, $uid) {
+        global $conn;
+        $flag = false;
+
+        $user = find_by_id($uid);
+
+        $date_created = date('Y-m-d H:i:s');
+        $query = "INSERT INTO `tbl_trace` (`action`, `uname`, `date`) VALUES ('".$action."', '".$user['uname']."', '".$date_created."')";
+        
+        if ($conn->query($query)) {
+            $flag = true;
+        }
+
+        return $flag;
+    }
+
+    function find_by_id($uid) {
+        global $conn;
+        $user = [];
+
+        $query = "SELECT `uname` FROM `tbl_user` WHERE `tbl_user`.`uid` = $uid";
+       
+        if ($result = $conn->query($query)) {
+            $user = $result->fetch_array(MYSQLI_ASSOC);
+        }
+
+        return $user;
+    }
 ?>
