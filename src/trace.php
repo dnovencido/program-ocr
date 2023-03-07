@@ -1,5 +1,6 @@
 <?php
     include 'session.php';
+    include 'check_login.php';
     include 'functions.php';
 
     if (isset($_GET['page_no'])) {
