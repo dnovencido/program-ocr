@@ -40,7 +40,10 @@
             if(!check_existing_reference_num($_POST['refnum'])) {
                 if(save_details($_POST['refnum'], $_POST['number'], $_POST['amount'], $_POST['name'])) {
                     $message[] = "Successfully saved";
-                    unset($_POST);
+                    //Record trace action
+                    if(save_trace("transaction-create", $_SESSION['uid'])) {
+                        unset($_POST);
+                    }
                 }
             } else {
                 $errors[] = "The reference number entered is already existing.";

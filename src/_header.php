@@ -18,6 +18,7 @@
                 <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
                     <?php if (isset($_SESSION['uid'])) { ?>
                         <li><a href="transactions.php" class="nav-link px-2 link-dark">Transactions</a></li>
+                        <li><a href="trace.php" class="nav-link px-2 link-dark">Audit Trail</a></li>
                     <?php } else { ?>
                         <li><a href="signin.php" class="nav-link px-2 link-dark">Login</a></li>
                         <li><a href="signup.php" class="nav-link px-2 link-dark">Signup</a></li>

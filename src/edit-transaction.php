@@ -10,7 +10,8 @@
             $errors = validate_form_transaction($_POST['refnum'], $_POST['number'], $_POST['amount'], $_POST['name']);
             if(update_transaction($transaction['tranID'], $_POST['refnum'], $_POST['number'], $_POST['amount'], $_POST['name'])) {
                 $message[] = "Transaction successfully updated. ";
-                // header("Location: edit-transaction.php?id=".$transaction['tranID']);
+                //Record trace action
+                save_trace("transaction-update", $_SESSION['uid']);
             } else {
                 $errors[] = "Could not update a transaction. Please try again later.";
             }

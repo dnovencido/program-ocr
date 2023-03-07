@@ -1,5 +1,6 @@
 <?php
     include "functions.php";
+    include 'session.php';
     
     $result = [];
 
@@ -9,6 +10,7 @@
 
         if($is_deleted) {
             $result['deleted'] = true;
+            save_trace("transaction-delete", $_SESSION['uid']);
         } 
     }
 
