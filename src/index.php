@@ -8,12 +8,16 @@
     $errors = [];
     $res = [];
     $message = [];
+    $image_path = "";
 
     if (isset($_POST['upload-file'])) {
         $file_name = $_FILES['file']['name'];
+        
         $tmp_file = $_FILES['file']['tmp_name'];
 
         $file_name = $_SESSION['uid'] . '_' . time() . '_' . str_replace(array('!', "@", '#', '$', '%', '^', '&', ' ', '*', '(', ')', ':', ';', ',', '?', '/' . '\\', '~', '`', '-'), '_', strtolower($file_name));
+
+        $image_path = 'uploads/' . $file_name;
 
         if (move_uploaded_file($tmp_file, 'uploads/' . $file_name)) {
             try {
@@ -35,14 +39,17 @@
     }
 
     if(isset($_POST['save-details'])) {
-       $errors = validate_form_transaction($_POST['refnum'], $_POST['number'], $_POST['amount'], $_POST['name']);
+        $image_path = $_POST['filename'];
+        $errors = validate_form_transaction($_POST['refnum'], $_POST['number'], $_POST['amount'], $_POST['name']);
         if(empty($errors)) {
             if(!check_existing_reference_num($_POST['refnum'])) {
-                if(save_details($_POST['refnum'], $_POST['number'], $_POST['amount'], $_POST['name'])) {
+                $transaction_id = save_details($_POST['refnum'], $_POST['number'], $_POST['amount'], $_POST['name']);
+                if($transaction_id != null ) {
                     $message[] = "Successfully saved";
                     //Record trace action
-                    if(save_trace("transaction-create", $_SESSION['uid'])) {
+                    if(save_trace("transaction-create", $_SESSION['uid'], $transaction_id)) {
                         unset($_POST);
+                        $image_path = "";
                     }
                 }
             } else {
@@ -71,11 +78,14 @@
                                 <input type="submit" class="btn btn-success btn-sm mt-3" name="upload-file" value="Upload" />
                             </form>
                         </div>
-                        <hr>
+                        <div class="mb-3 preview-image ">
+                            <img src="<?= ($image_path) ? $image_path : ''  ?>"  width="50%" class="ms-auto me-auto d-block"/>
+                        </div>
                         <div class="mb-3">
                             <form method="post">
                                 <div class="mb-3">
                                     <label for="refnum" class="form-label">Reference Number: </label>
+                                    <input type="hidden" name="filename" value="<?= (isset($_POST['filename'])) ?  $_POST['filename'] : $image_path ?>"/>
                                     <?php $refnum = (isset($res[18])) ? $res[19] . $res[20] . $res[21] : ""  ?>
                                     <input type="text" class="form-control" id="refnum" name="refnum" value= "<?= (isset($_POST['refnum'])) ? $_POST['refnum'] : $refnum ?>" />
                                 </div>

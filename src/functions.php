@@ -96,29 +96,29 @@
     
     function save_details($reference_number, $number, $amount, $name) {
         global $conn;
-        $flag = false;
+        $transaction_id = null;
 
         $date_created = date('Y-m-d H:i:s');
         $query = "INSERT INTO `tbl_transaction` (`refnum`, `number`, `amount`, `name`, `date_created`) VALUES ('".escape_string($reference_number)."', '".escape_string(($number))."', '".escape_string(($amount))."', '".escape_string(($name))."', '".$date_created."')";
         
         if ($conn->query($query)) {
-            $flag = true;
+           $transaction_id = $conn->insert_id;
         }
 
-        return $flag;
+        return $transaction_id;
     }
 
     function update_transaction($tranID, $refnum, $number, $amount, $name) {
         global $conn;
-        $flag = false;
+        $transaction_id = null;
 
         $query = "UPDATE `tbl_transaction` SET `refnum` = '".escape_string($refnum)."', `number` = '".escape_string($number)."', `amount` = '".escape_string($amount)."', `name` = '".escape_string($name)."' WHERE `tranID` = '".escape_string($tranID)."' ";
         
         if ($conn->query($query)) {
-            $flag = true;
+            $transaction_id = $conn->insert_id;
         }
 
-        return $flag;
+        return $tranID;
     }
 
     function get_all_transactions($offset, $total_records_per_page) {
@@ -241,14 +241,15 @@
         return $transactions;
     }      
 
-    function save_trace($action, $uid) {
+    function save_trace($action, $uid, $refid) {
         global $conn;
         $flag = false;
 
-        $user = find_by_id($uid);
+        $user = user_find_by_id($uid);
+        $transaction = transaction_find_by_id($refid);
 
         $date_created = date('Y-m-d H:i:s');
-        $query = "INSERT INTO `tbl_trace` (`action`, `uname`, `date`) VALUES ('".$action."', '".$user['uname']."', '".$date_created."')";
+        $query = "INSERT INTO `tbl_trace` (`action`, `uname`, `date`, `refnum`) VALUES ('".$action."', '".$user['uname']."', '".$date_created."', '".$transaction['refnum']."')";
         
         if ($conn->query($query)) {
             $flag = true;
@@ -257,7 +258,20 @@
         return $flag;
     }
 
-    function find_by_id($uid) {
+    function transaction_find_by_id($tranID) {
+        global $conn;
+        $transaction = [];
+
+        $query = "SELECT `refnum` FROM `tbl_transaction` WHERE `tbl_transaction`.`tranID` = ".$tranID." LIMIT 1";
+
+        if($result = $conn->query($query)) {
+            $transaction = $result->fetch_array(MYSQLI_ASSOC);
+        }
+
+        return $transaction;
+    }
+    
+    function user_find_by_id($uid) {
         global $conn;
         $user = [];
 

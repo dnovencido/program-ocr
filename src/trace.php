@@ -53,6 +53,7 @@
                     <th scope="col">Trail ID</th>
                     <th scope="col">Username</th>
                     <th scope="col">Action</th>
+                    <th scope="col">Reference Number</th>
                     <th scope="col">Date</th>
                 </tr>
             </thead>
@@ -63,6 +64,7 @@
                             <td><?= $row['trailid'] ?></td>
                             <td><?= $row['uname'] ?></td>
                             <td><?= $row['action'] ?></td>
+                            <td><?= $row['refnum'] ?></td>
                             <td><?= $row['date'] ?></td>
                         </tr>
                     <?php } ?>

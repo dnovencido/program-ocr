@@ -8,10 +8,11 @@
         $transaction = get_transaction($_GET['id']);
         if(isset($_POST['update-details'])) {
             $errors = validate_form_transaction($_POST['refnum'], $_POST['number'], $_POST['amount'], $_POST['name']);
-            if(update_transaction($transaction['tranID'], $_POST['refnum'], $_POST['number'], $_POST['amount'], $_POST['name'])) {
+            $transaction_id = update_transaction($transaction['tranID'], $_POST['refnum'], $_POST['number'], $_POST['amount'], $_POST['name']);
+            if($transaction_id != null) {
                 $message[] = "Transaction successfully updated. ";
                 //Record trace action
-                save_trace("transaction-update", $_SESSION['uid']);
+                save_trace("transaction-update", $_SESSION['uid'], $transaction_id);
             } else {
                 $errors[] = "Could not update a transaction. Please try again later.";
             }
